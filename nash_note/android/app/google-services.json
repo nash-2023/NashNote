@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1063438116773",
+    "project_id": "nash-note",
+    "storage_bucket": "nash-note.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1063438116773:android:416377f1417f8782876a4c",
+        "android_client_info": {
+          "package_name": "com.example.nash_note"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1063438116773-v0tq7r7d5usbpgrn76ek1dk0bfbqfvbj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nash_note",
+            "certificate_hash": "9d44c05980c28a891b8a43dbe33793074bedc87d"
+          }
+        },
+        {
+          "client_id": "1063438116773-jifmaq02o88b0ln8npg4ciavrkrtjj22.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcRiwbRJ_YiwRt2SzKdbElIo3tSaJ4s80"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1063438116773-jifmaq02o88b0ln8npg4ciavrkrtjj22.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
