@@ -1,0 +1,42 @@
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:nash_note/auth/login.dart';
+import 'package:nash_note/auth/sign_up.dart';
+import 'package:nash_note/crud/addnote.dart';
+import 'package:nash_note/home/homepage.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    var user = FirebaseAuth.instance.currentUser;
+    return MaterialApp(
+      title: 'Note Book',
+      debugShowCheckedModeBanner: false,
+      home: (user == null) ? Login() : HomePage(),
+      // home: Login(),
+      routes: {
+        'login': (context) => Login(),
+        'signup': (context) => Signup(),
+        'homepage': (context) => HomePage(),
+        'addnote': (context) => Addnote(),
+      },
+      theme: ThemeData(
+        primaryColor: Colors.red,
+        textTheme: TextTheme(),
+      ),
+    );
+  }
+}
