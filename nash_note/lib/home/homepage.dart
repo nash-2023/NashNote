@@ -22,58 +22,63 @@ class _HomePageState extends State<HomePage> {
       'note': "lorem epsum 1",
       'image': 'set.jpg',
     },
-    {
-      'title': "home work",
-      'note': "lorem epsum 2",
-      'image': 'us.jpg',
-    },
-    {
-      'title': "home work",
-      'note': "lorem epsum 3",
-      'image': 'ark.jpg',
-    },
-    {
-      'title': "home work",
-      'note': "lorem epsum 4",
-      'image': 'set.jpg',
-    },
-    {
-      'title': "home work",
-      'note': "lorem epsum 5",
-      'image': 'us.jpg',
-    },
-    {
-      'title': "home work",
-      'note': "lorem epsum 6",
-      'image': 'ark.jpg',
-    },
-    {
-      'title': "home work",
-      'note': "lorem epsum 7",
-      'image': 'set.jpg',
-    },
-    {
-      'title': "home work",
-      'note': "lorem epsum 8",
-      'image': 'us.jpg',
-    },
   ];
 
-  void getUser() {
+  String? getUser() {
     var user = FirebaseAuth.instance.currentUser;
-    print(user!.email);
+    print('user ID :------------------${user!.uid}');
+
+    return user.email;
   }
 
   void getData() async {
+    ///----------------------------------------------------------------------
     // FirebaseFirestore.instance
     //     .collection('users')
     //     .get()
     //     .then((v) => v.docs.forEach((e) => print(e.data())));
-    FirebaseFirestore.instance
-        .collection('users')
-        .doc('6s5fg3xts3sfVHNjXymX')
-        .get()
-        .then((e) => print(e.id));
+    ///--------------------------------------------------------------------
+    // FirebaseFirestore.instance
+    //     .collection('users')
+    //     .doc('6s5fg3xts3sfVHNjXymX')
+    //     .get()
+    //     .then((e) => print(e.data()!['username']));
+    ///---------------------------------------------------------------------
+    // FirebaseFirestore.instance
+    //     .collection('notes')
+    //     .where('ownerid', isEqualTo: '6s5fg3xts3sfVHNjXymX')
+    //     .get()
+    //     .then((v) => v.docs.forEach((e) => print(e.data()['title'])));
+    ///-----------------------------------------------------------------------
+    // FirebaseFirestore.instance
+    //     .collection('users')
+    //     .get()
+    //     .then((v) => v.docs.forEach((e) => print(e.data())));
+    ///----------------------Stream--------------------------------------------
+    // FirebaseFirestore.instance
+    //     .collection('notes')
+    //     // .where('owherid', isEqualTo: 'F28cGYZKZXnChxCiqVUq')
+    //     .snapshots()
+    //     .listen((event) {
+    //   event.docs.forEach((element) => print(element.data()));
+    // });
+    // ----------------------------Add data ------------------------------------
+    // FirebaseFirestore.instance.collection('notes').add({
+    //           'title': 'Learn#flutter',
+    //           'body': 'learn flutter',
+    //           'image': '99.jpeg',
+    //           'ownerid': 'F28cGYZKZXnChxCiqVUq'
+    //         });
+    // ----------------------------Edit data (update)------------------------------------
+    // FirebaseFirestore.instance
+    //     .collection('notes')
+    //     .doc('yV8jBnZPSo7F1leNgNj3')
+    //     .update({
+    //   'title': 'Learn Flutter Framework',
+    //   'body': 'Learn to Programming with dart &flutter',
+    //   'image': '100.jpeg',
+    // });
+    //--------------------------------------------------------------------------
   }
 
   @override
@@ -85,11 +90,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     double _mdqr = MediaQuery.of(context).size.width;
+    String? usr = getUser();
     return Directionality(
       // [ Directionality ] widget for Arabic-English conversion
       textDirection: TextDirection.ltr,
       child: Scaffold(
         appBar: AppBar(
+          leading: Text('${usr}'),
           title: Text('my home'),
           actions: [
             IconButton(
@@ -145,8 +152,8 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: Theme.of(context).primaryColor,
           child: Icon(Icons.add),
           onPressed: () {
-            print("FAB");
-            Navigator.pushNamed(context, 'addnote');
+            // print("FAB");
+            // Navigator.pushNamed(context, 'addnote');
           },
         ),
       ),
