@@ -16,50 +16,40 @@ class _HomePageState extends State<HomePage> {
   String? userID;
   String? usrNm;
   String? usrMail;
-
+  // List<QueryDocumentSnapshot<Map<String, dynamic>>> notes = [];
   void getUser() async {
     var user = FirebaseAuth.instance.currentUser;
     userID = user!.uid;
     usrMail = user.email;
     usrNm = user.displayName;
-    //to be deleted
-    // var x = await FirebaseFirestore.instance
-    //     .collection('users')
-    //     .where('userID', isEqualTo: userID)
-    //     .get();
-    // usrNm = x.docs[0].data()['username'];
-    //-----------------
-    // print(usrNm);
-    // print(usrMail);
     setState(() {});
   }
 
-  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> getData() async {
-    ///----------------------------------------------------------------------
+  trials() async {
+    // Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> getData() async {
+    //----------------------------------------------------------------------
     // FirebaseFirestore.instance
     //     .collection('users')
     //     .get()
     //     .then((v) => v.docs.forEach((e) => print(e.data())));
-
-    ///--------------------------------------------------------------------
+    //--------------------------------------------------------------------
     // FirebaseFirestore.instance
     //     .collection('users')
     //     .doc('6s5fg3xts3sfVHNjXymX')
     //     .get()
     //     .then((e) => print(e.data()!['username']));
-    ///---------------------------------------------------------------------
+    //---------------------------------------------------------------------
     // FirebaseFirestore.instance
     //     .collection('users')
     //     .get()
     //     .then((v) => v.docs.forEach((e) => print(e.data())));
-    ///----------------------for Stream builder--------------------------------------------
-    FirebaseFirestore.instance
-        .collection('notes')
-        .snapshots()
-        .listen((event) => event.docs.forEach((element) {
-              print(element.data()['title']);
-            }));
-
+    //----------------------for Stream subscription--------------------------------------------
+    // FirebaseFirestore.instance
+    //     .collection('notes')
+    //     .snapshots()
+    //     .listen((event) => event.docs.forEach((element) {
+    //           print(element.data()['title']);
+    //         }));
     // ----------------------------{{ Add Note }} ------------------------------------
     // FirebaseFirestore.instance.collection('notes').add({
     //   'title': 'Abdalla 4Do',
@@ -77,17 +67,55 @@ class _HomePageState extends State<HomePage> {
     //   'image': '100.jpeg',
     // });
     //---------------------------------------for future builder-----------------------------------
-    var v = await FirebaseFirestore.instance
-        .collection('notes')
-        .where('ownerid', isEqualTo: userID)
-        .get();
-    return v.docs;
-    // // /-----------------------------------------------------------------------
+    // var v = await FirebaseFirestore.instance
+    //     .collection('notes')
+    //     .where('ownerid', isEqualTo: userID)
+    //     .get();
+    // return v.docs;
+    // // /-----------------------------------------------------------------------ep 21 transaction
+    // final DocumentReference<Map<String, dynamic>> userDoc = FirebaseFirestore
+    //     .instance
+    //     .collection('users')
+    //     .doc('6s5fg3xts3sfVHNjXymX');
+    // FirebaseFirestore.instance.runTransaction((transaction) async {
+    //   final DocumentSnapshot<Map<String, dynamic>> docSnap =
+    //       await transaction.get(userDoc);
+    //   if (docSnap.exists) {
+    //     print('exist');
+    //     transaction.update(userDoc, {
+    //       'phone': '01129116666',
+    //     });
+    //   } else {
+    //     print('notexist');
+    //   }
+    // });
+    // -------------------------- 22 Batch Write ----------------------------
+    //   final DocumentReference<Map<String, dynamic>> emanDoc = FirebaseFirestore
+    //     .instance
+    //     .collection('users')
+    //     .doc('6s5fg3xts3sfVHNjXymX');
+    // final DocumentReference<Map<String, dynamic>> newDoc = FirebaseFirestore
+    //     .instance
+    //     .collection('users')
+    //     .doc('kDDsRygUz9VvI7dpf9Dh');
+    // WriteBatch batch = FirebaseFirestore.instance.batch();
+    // batch.delete(newDoc);
+    // batch.update(emanDoc, {'phone': '011125252525'});
+    // batch.commit();
+    //----------------------------23 show data in ui
+    // var x = await FirebaseFirestore.instance.collection('notes').get();
+    // x.docs.forEach((element) {
+    //   // print(element.data()['username']);
+    //   notes.add(element);
+    // });
+    // // print(notes);
+    // setState(() {});
   }
 
   @override
   void initState() {
     getUser();
+    trials();
     super.initState();
   }
 
@@ -125,56 +153,56 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         body: Container(
-            // child: FutureBuilder(
-            child: StreamBuilder(
-          // future: getData(),
-          stream: FirebaseFirestore.instance
-              .collection('notes')
-              .where('ownerid', isEqualTo: userID)
-              .snapshots(),
-          builder: (context, snapshot) {
-            Widget render;
-            if (snapshot.hasData) {
-              var fnotes = snapshot.data!.docs;
-              render = ListView(
-                children: List.generate(
-                  // _notes.length,
-                  fnotes.length,
-                  (i) {
-                    return Row(
-                      children: [
-                        Expanded(
-                          flex: 5,
-                          child: ViewItem(
-                            note: fnotes[i],
+          child: StreamBuilder(
+            // future: getData(),
+            stream: FirebaseFirestore.instance
+                .collection('notes')
+                .where('ownerid', isEqualTo: userID)
+                .snapshots(),
+            builder: (context, snapshot) {
+              Widget render;
+              if (snapshot.hasData) {
+                var fnotes = snapshot.data!.docs;
+                render = ListView(
+                  children: List.generate(
+                    // _notes.length,
+                    fnotes.length,
+                    (i) {
+                      return Row(
+                        children: [
+                          Expanded(
+                            flex: 5,
+                            child: ViewItem(
+                              note: fnotes[i],
+                            ),
                           ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: IconButton(
-                            icon: Icon(Icons.delete_forever),
-                            onPressed: () {
-                              setState(
-                                () {
-                                  // _notes.removeAt(i);
-                                },
-                              );
-                            },
+                          Expanded(
+                            flex: 1,
+                            child: IconButton(
+                              icon: Icon(Icons.delete_forever),
+                              onPressed: () {
+                                setState(
+                                  () {
+                                    // _notes.removeAt(i);
+                                  },
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              );
-            } else if (snapshot.hasError) {
-              render = Text("eror${snapshot.error}");
-            } else {
-              render = CircularProgressIndicator();
-            }
-            return render;
-          },
-        )),
+                        ],
+                      );
+                    },
+                  ),
+                );
+              } else if (snapshot.hasError) {
+                render = Text("eror${snapshot.error}");
+              } else {
+                render = CircularProgressIndicator();
+              }
+              return render;
+            },
+          ),
+        ),
         floatingActionButton: FloatingActionButton(
           backgroundColor: Theme.of(context).primaryColor,
           child: Icon(Icons.add),
@@ -269,3 +297,22 @@ class ViewItem extends StatelessWidget {
   } 
 
   */
+/*---------------------------------
+
+//------------------
+
+ */
+/*
+body: ListView(
+          children: (notes.isEmpty)
+              ? [
+                  CircularProgressIndicator(),
+                ]
+              : [
+                  for (var i in notes)
+                    ViewItem(
+                      note: i,
+                    )
+                ],
+        ),
+ */
