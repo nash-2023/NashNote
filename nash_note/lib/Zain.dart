@@ -1,9 +1,12 @@
+import 'dart:html';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:image_picker/image_picker.dart';
 import 'firebase_options.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
-import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,12 +21,38 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<EmailAuthProvider> providers = [EmailAuthProvider()];
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
+
+      // initialRoute:
+      //     FirebaseAuth.instance.currentUser == null ? '/sign-in' : '/profile',
+      // routes: {
+      //   '/sign-in': (context) {
+      //     return SignInScreen(
+      //       providers: providers,
+      //       actions: [
+      //         AuthStateChangeAction<SignedIn>((context, state) {
+      //           Navigator.pushReplacementNamed(context, '/profile');
+      //         }),
+      //       ],
+      //     );
+      //   },
+      //   '/profile': (context) {
+      //     return ProfileScreen(
+      //       providers: providers,
+      //       actions: [
+      //         SignedOutAction((context) {
+      //           Navigator.pushReplacementNamed(context, '/sign-in');
+      //         }),
+      //       ],
+      //     );
+      //   },
+      // },
     );
   }
 }
@@ -38,45 +67,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
-  Future<UserCredential> signIn2WithGoogle() async {
-    // for Android & IOS
-    // Trigger the authentication flow
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
-    // Obtain the auth details from the request
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
-
-    // Create a new credential
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
-    );
-
-    // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance.signInWithCredential(credential);
-  }
-
-  Future<UserCredential> signInWithGoogle() async {
-    // For Web
-    // Create a new provider
-    GoogleAuthProvider googleProvider = GoogleAuthProvider();
-
-    googleProvider
-        .addScope('https://www.googleapis.com/auth/contacts.readonly');
-    googleProvider.setCustomParameters({'login_hint': 'user@example.com'});
-
-    // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance.signInWithPopup(googleProvider);
-
-    // Or use signInWithRedirect
-    // return await FirebaseAuth.instance.signInWithRedirect(googleProvider);
+  File? file;
+  var imagepicker = ImagePicker();
+  void uploadImage() async {
+    var imgPicked = await imagepicker.getImage(source: ImageSource.gallery);
+    if (imgPicked != null) {
+      // file = File(imgPicked.path);
+      print(imgPicked.path);
+    }
   }
 
   Widget build(BuildContext context) {
@@ -91,12 +89,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               onPressed: () async {
                 //***************
-                UserCredential x = await signIn2WithGoogle();
-                print(x);
-
+                uploadImage();
                 //****************
               },
-              child: Text("sign In"),
+              child: Text("upload image"),
             ),
           ],
         ),
@@ -111,3 +107,40 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
+
+
+  // Future<UserCredential> signIn2WithGoogle() async {
+  //   // for Android & IOS
+  //   // Trigger the authentication flow
+  //   final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+  //   // Obtain the auth details from the request
+  //   final GoogleSignInAuthentication? googleAuth =
+  //       await googleUser?.authentication;
+
+  //   // Create a new credential
+  //   final credential = GoogleAuthProvider.credential(
+  //     accessToken: googleAuth?.accessToken,
+  //     idToken: googleAuth?.idToken,
+  //   );
+
+  //   // Once signed in, return the UserCredential
+  //   return await FirebaseAuth.instance.signInWithCredential(credential);
+  // }
+
+  // Future<UserCredential> signInWithGoogle() async {
+  //   // For Web
+  //   // Create a new provider
+  //   GoogleAuthProvider googleProvider = GoogleAuthProvider();
+
+  //   googleProvider
+  //       .addScope('https://www.googleapis.com/auth/contacts.readonly');
+  //   googleProvider.setCustomParameters({'login_hint': 'user@example.com'});
+
+  //   // Once signed in, return the UserCredential
+  //   return await FirebaseAuth.instance.signInWithPopup(googleProvider);
+
+  //   // Or use signInWithRedirect
+  //   // return await FirebaseAuth.instance.signInWithRedirect(googleProvider);
+  // }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,32 +13,34 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Map<String, String>> _notes = [
-    {
-      'title': "home work",
-      'note': "lorem epsum 0",
-      'image': 'dog.jpg',
-    },
-    {
-      'title': "home work",
-      'note': "lorem epsum 1",
-      'image': 'set.jpg',
-    },
-  ];
+  String? userID;
+  String? usrNm;
+  String? usrMail;
 
-  String? getUser() {
+  void getUser() async {
     var user = FirebaseAuth.instance.currentUser;
-    print('user ID :------------------${user!.uid}');
-
-    return user.email;
+    userID = user!.uid;
+    usrMail = user.email;
+    usrNm = user.displayName;
+    //to be deleted
+    // var x = await FirebaseFirestore.instance
+    //     .collection('users')
+    //     .where('userID', isEqualTo: userID)
+    //     .get();
+    // usrNm = x.docs[0].data()['username'];
+    //-----------------
+    // print(usrNm);
+    // print(usrMail);
+    setState(() {});
   }
 
-  void getData() async {
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> getData() async {
     ///----------------------------------------------------------------------
     // FirebaseFirestore.instance
     //     .collection('users')
     //     .get()
     //     .then((v) => v.docs.forEach((e) => print(e.data())));
+
     ///--------------------------------------------------------------------
     // FirebaseFirestore.instance
     //     .collection('users')
@@ -45,30 +49,24 @@ class _HomePageState extends State<HomePage> {
     //     .then((e) => print(e.data()!['username']));
     ///---------------------------------------------------------------------
     // FirebaseFirestore.instance
-    //     .collection('notes')
-    //     .where('ownerid', isEqualTo: '6s5fg3xts3sfVHNjXymX')
-    //     .get()
-    //     .then((v) => v.docs.forEach((e) => print(e.data()['title'])));
-    ///-----------------------------------------------------------------------
-    // FirebaseFirestore.instance
     //     .collection('users')
     //     .get()
     //     .then((v) => v.docs.forEach((e) => print(e.data())));
-    ///----------------------Stream--------------------------------------------
-    // FirebaseFirestore.instance
-    //     .collection('notes')
-    //     // .where('owherid', isEqualTo: 'F28cGYZKZXnChxCiqVUq')
-    //     .snapshots()
-    //     .listen((event) {
-    //   event.docs.forEach((element) => print(element.data()));
-    // });
-    // ----------------------------Add data ------------------------------------
+    ///----------------------for Stream builder--------------------------------------------
+    FirebaseFirestore.instance
+        .collection('notes')
+        .snapshots()
+        .listen((event) => event.docs.forEach((element) {
+              print(element.data()['title']);
+            }));
+
+    // ----------------------------{{ Add Note }} ------------------------------------
     // FirebaseFirestore.instance.collection('notes').add({
-    //           'title': 'Learn#flutter',
-    //           'body': 'learn flutter',
-    //           'image': '99.jpeg',
-    //           'ownerid': 'F28cGYZKZXnChxCiqVUq'
-    //         });
+    //   'title': 'Abdalla 4Do',
+    //   'body': 'Work flutter',
+    //   'image': '105.jpeg',
+    //   'ownerid': userID,
+    // });
     // ----------------------------Edit data (update)------------------------------------
     // FirebaseFirestore.instance
     //     .collection('notes')
@@ -78,26 +76,31 @@ class _HomePageState extends State<HomePage> {
     //   'body': 'Learn to Programming with dart &flutter',
     //   'image': '100.jpeg',
     // });
-    //--------------------------------------------------------------------------
+    //---------------------------------------for future builder-----------------------------------
+    var v = await FirebaseFirestore.instance
+        .collection('notes')
+        .where('ownerid', isEqualTo: userID)
+        .get();
+    return v.docs;
+    // // /-----------------------------------------------------------------------
   }
 
   @override
   void initState() {
-    getData();
+    getUser();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    double _mdqr = MediaQuery.of(context).size.width;
-    String? usr = getUser();
     return Directionality(
       // [ Directionality ] widget for Arabic-English conversion
       textDirection: TextDirection.ltr,
       child: Scaffold(
         appBar: AppBar(
-          leading: Text('${usr}'),
+          // leading: Text('${usr}'),
           title: Text('my home'),
+          centerTitle: true,
           actions: [
             IconButton(
               onPressed: () async {
@@ -108,52 +111,75 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-        body: Container(
-          child: ListView(
-            children: List.generate(
-              _notes.length,
-              (i) {
-                /* return Dismissible(
-                  key: Key("$i"),
-                  child: Row(children: [ 
-                    ...the underneith followin code
-                    ],
-                    ),
-                );*/
-                return Row(
-                  children: [
-                    Expanded(
-                      flex: 5,
-                      child: ViewItem(
-                        mdqr: _mdqr,
-                        note: _notes[i],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: IconButton(
-                        icon: Icon(Icons.delete_forever),
-                        onPressed: () {
-                          setState(
-                            () {
-                              _notes.removeAt(i);
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
+        drawer: Drawer(
+          child: Column(
+            children: [
+              UserAccountsDrawerHeader(
+                currentAccountPicture: CircleAvatar(
+                  backgroundColor: Colors.red,
+                ),
+                accountName: Text("${usrNm}"),
+                accountEmail: Text("${usrMail}"),
+              ),
+            ],
           ),
         ),
+        body: Container(
+            // child: FutureBuilder(
+            child: StreamBuilder(
+          // future: getData(),
+          stream: FirebaseFirestore.instance
+              .collection('notes')
+              .where('ownerid', isEqualTo: userID)
+              .snapshots(),
+          builder: (context, snapshot) {
+            Widget render;
+            if (snapshot.hasData) {
+              var fnotes = snapshot.data!.docs;
+              render = ListView(
+                children: List.generate(
+                  // _notes.length,
+                  fnotes.length,
+                  (i) {
+                    return Row(
+                      children: [
+                        Expanded(
+                          flex: 5,
+                          child: ViewItem(
+                            note: fnotes[i],
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: IconButton(
+                            icon: Icon(Icons.delete_forever),
+                            onPressed: () {
+                              setState(
+                                () {
+                                  // _notes.removeAt(i);
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              );
+            } else if (snapshot.hasError) {
+              render = Text("eror${snapshot.error}");
+            } else {
+              render = CircularProgressIndicator();
+            }
+            return render;
+          },
+        )),
         floatingActionButton: FloatingActionButton(
           backgroundColor: Theme.of(context).primaryColor,
           child: Icon(Icons.add),
           onPressed: () {
-            // print("FAB");
-            // Navigator.pushNamed(context, 'addnote');
+            Navigator.pushNamed(context, 'addnote');
           },
         ),
       ),
@@ -162,12 +188,12 @@ class _HomePageState extends State<HomePage> {
 }
 
 class ViewItem extends StatelessWidget {
-  const ViewItem({Key? key, required this.note, this.mdqr}) : super(key: key);
+  const ViewItem({Key? key, required this.note}) : super(key: key);
   final note;
-  final mdqr;
+
   @override
   Widget build(BuildContext context) {
-    String img = note['image'];
+    String img = note.data()['image'];
     return Card(
       child: Row(
         children: [
@@ -182,8 +208,8 @@ class ViewItem extends StatelessWidget {
           Expanded(
             flex: 4,
             child: ListTile(
-              title: Text(note["title"]),
-              subtitle: Text(note["note"]),
+              title: Text(note.data()["title"]),
+              subtitle: Text(note.data()["body"]),
               trailing: IconButton(
                 icon: Icon(Icons.edit),
                 onPressed: () {},
@@ -196,6 +222,9 @@ class ViewItem extends StatelessWidget {
   }
 }
 
+/*
+**
+*/
 // // If you wanna make it in the _HomePageState >> build( * );
 // // It will be as following
 // ListTile(
@@ -208,8 +237,6 @@ class ViewItem extends StatelessWidget {
 //               title: Text(_notes[i]["title"]),
 //               subtitle: Text(_notes[i]['note']),
 //             );
-
-
 /***********
  * 
  * 

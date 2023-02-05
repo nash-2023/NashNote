@@ -1,4 +1,5 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
@@ -71,6 +72,7 @@ class _SignupState extends State<Signup> {
                       if (!EmailValidator.validate(email!))
                         return 'email is not valid';
                     },
+                    keyboardType: TextInputType.emailAddress,
                   ),
                   SizedBox(height: 20),
                   TextFormField(
@@ -107,7 +109,14 @@ class _SignupState extends State<Signup> {
                               email: _mail!,
                               password: _psswrd!,
                             );
-                            // print(credential.user!.email);
+                            //to be cancelled
+                            // var userId = credential.user!.uid;
+                            // FirebaseFirestore.instance.collection('users').add({
+                            //   'userID': userId,
+                            //   'username': _name,
+                            // });
+                            //--------------------------
+                            credential.user!.updateDisplayName(_name);
                             if (credential != null)
                               Navigator.pushReplacementNamed(
                                   context, 'homepage');

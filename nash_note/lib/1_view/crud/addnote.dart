@@ -1,3 +1,7 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 class Addnote extends StatefulWidget {
@@ -8,6 +12,12 @@ class Addnote extends StatefulWidget {
 }
 
 class _AddnoteState extends State<Addnote> {
+  GlobalKey<FormState> _formState = new GlobalKey<FormState>();
+  String? _title;
+  String? _body;
+  String? _img; // no use
+  String? userID = FirebaseAuth.instance.currentUser!.uid;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,11 +28,13 @@ class _AddnoteState extends State<Addnote> {
       body: Container(
         padding: EdgeInsets.all(25.0),
         child: Form(
-          autovalidateMode: AutovalidateMode.always,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          key: _formState,
+          // autovalidateMode: AutovalidateMode.always,
+          child: ListView(
+            // crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
+                onSaved: (newValue) => _title = newValue,
                 maxLength: 30,
                 decoration: InputDecoration(
                   // hintText: "Title",
@@ -35,6 +47,7 @@ class _AddnoteState extends State<Addnote> {
                 ),
               ),
               TextFormField(
+                onSaved: (newValue) => _body = newValue,
                 maxLines: 3,
                 maxLength: 100,
                 decoration: InputDecoration(
@@ -74,7 +87,32 @@ class _AddnoteState extends State<Addnote> {
                       )),
                 ),
                 onPressed: () {
-                  Navigator.pushNamed(context, 'homepage');
+                  // Navigator.pushNamed(context, 'homepage');
+                  if (_formState.currentState!.validate()) {
+                    _formState.currentState!.save();
+                    try {
+                      FirebaseFirestore.instance.collection('notes').add({
+                        'title': _title,
+                        'ownerid': userID,
+                        'body': _body,
+                        'image': '3.png',
+                      });
+                      Navigator.pushReplacementNamed(context, 'homepage');
+                    } catch (e) {
+                      print(e);
+                      AwesomeDialog(
+                        context: context,
+                        dialogType: DialogType.error,
+                        animType: AnimType.rightSlide,
+                        headerAnimationLoop: false,
+                        title: 'Auth Error',
+                        desc: '${e}',
+                        btnOkOnPress: () {},
+                        btnOkIcon: Icons.cancel,
+                        btnOkColor: Colors.red,
+                      ).show();
+                    }
+                  }
                 },
               ),
             ],
