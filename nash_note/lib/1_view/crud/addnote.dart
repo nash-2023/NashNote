@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image_picker_for_web/image_picker_for_web.dart';
 
 class Addnote extends StatefulWidget {
   const Addnote({Key? key}) : super(key: key);
@@ -17,6 +22,18 @@ class _AddnoteState extends State<Addnote> {
   String? _body;
   String? _img; // no use
   String? userID = FirebaseAuth.instance.currentUser!.uid;
+  File? file;
+  var imagePicker = ImagePicker();
+  uploadImage() async {
+    // var imgpicked = await imagePicker.getImage(source: ImageSource.gallery);
+    var imgpicked = await imagePicker.pickImage(source: ImageSource.gallery);
+    if (imgpicked != null) {
+      file = File(imgpicked.path);
+      print(imgpicked.path);
+    } else {
+      print("please choose IMG");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,12 +88,10 @@ class _AddnoteState extends State<Addnote> {
                   ),
                 ),
                 onPressed: () {
-                  showBottomSheet();
+                  // showBottomSheet();
                 },
               ),
-              SizedBox(
-                height: 20,
-              ),
+              SizedBox(height: 20),
               ElevatedButton(
                 child: Container(
                   padding: EdgeInsets.all(10.0),
@@ -142,8 +157,9 @@ class _AddnoteState extends State<Addnote> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {
-                    print("gallery inkweel");
+                  onTap: () async {
+                    // print("gallery inkweel");
+                    await uploadImage();
                   },
                   child: Container(
                     padding: EdgeInsets.symmetric(
