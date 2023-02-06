@@ -16,7 +16,7 @@ class _HomePageState extends State<HomePage> {
   String? userID;
   String? usrNm;
   String? usrMail;
-  // List<QueryDocumentSnapshot<Map<String, dynamic>>> notes = [];
+  // List<QueryDocumentSnapshot<Map<String, dynamic>>> notes = []; //-23
   void getUser() async {
     var user = FirebaseAuth.instance.currentUser;
     userID = user!.uid;
@@ -25,8 +25,9 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
-  trials() async {
-    // Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> getData() async {
+  // trials() async {
+  //-------for future builder
+  Future<QuerySnapshot<Map<String, dynamic>>> getData() async {
     //----------------------------------------------------------------------
     // FirebaseFirestore.instance
     //     .collection('users')
@@ -43,21 +44,21 @@ class _HomePageState extends State<HomePage> {
     //     .collection('users')
     //     .get()
     //     .then((v) => v.docs.forEach((e) => print(e.data())));
-    //----------------------for Stream subscription--------------------------------------------
+    //----------------------for Stream subscription----------------------
     // FirebaseFirestore.instance
     //     .collection('notes')
     //     .snapshots()
     //     .listen((event) => event.docs.forEach((element) {
     //           print(element.data()['title']);
     //         }));
-    // ----------------------------{{ Add Note }} ------------------------------------
+    // ----------------------------{{ Add Note }} --------------
     // FirebaseFirestore.instance.collection('notes').add({
     //   'title': 'Abdalla 4Do',
     //   'body': 'Work flutter',
     //   'image': '105.jpeg',
     //   'ownerid': userID,
     // });
-    // ----------------------------Edit data (update)------------------------------------
+    // ----------------------------Edit data (update)----------------
     // FirebaseFirestore.instance
     //     .collection('notes')
     //     .doc('yV8jBnZPSo7F1leNgNj3')
@@ -66,13 +67,13 @@ class _HomePageState extends State<HomePage> {
     //   'body': 'Learn to Programming with dart &flutter',
     //   'image': '100.jpeg',
     // });
-    //---------------------------------------for future builder-----------------------------------
-    // var v = await FirebaseFirestore.instance
-    //     .collection('notes')
-    //     .where('ownerid', isEqualTo: userID)
-    //     .get();
-    // return v.docs;
-    // // /-----------------------------------------------------------------------ep 21 transaction
+    //----------------------------------------------for future builder---
+    var v = await FirebaseFirestore.instance
+        .collection('notes')
+        .where('ownerid', isEqualTo: userID)
+        .get();
+    return v;
+    // -------------------ep 21 transaction
     // final DocumentReference<Map<String, dynamic>> userDoc = FirebaseFirestore
     //     .instance
     //     .collection('users')
@@ -115,7 +116,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     getUser();
-    trials();
+    // trials();
     super.initState();
   }
 
@@ -154,7 +155,6 @@ class _HomePageState extends State<HomePage> {
         ),
         body: Container(
           child: StreamBuilder(
-            // future: getData(),
             stream: FirebaseFirestore.instance
                 .collection('notes')
                 .where('ownerid', isEqualTo: userID)
@@ -183,7 +183,12 @@ class _HomePageState extends State<HomePage> {
                               onPressed: () {
                                 setState(
                                   () {
-                                    // _notes.removeAt(i);
+                                    var noteID = fnotes[i].id;
+                                    print('${fnotes[i].id}');
+                                    FirebaseFirestore.instance
+                                        .collection('notes')
+                                        .doc(noteID)
+                                        .delete();
                                   },
                                 );
                               },
@@ -250,6 +255,75 @@ class ViewItem extends StatelessWidget {
   }
 }
 
+//-------- simple approach
+/*
+ListView(
+          children: (notes.isEmpty)
+              ? [
+                  CircularProgressIndicator(),
+                ]
+              : [
+                  for (var i in notes)
+                    ViewItem(
+                      note: i,
+                    )
+                ],
+        ),
+*/
+//-------- Future Builder
+/*
+FutureBuilder(
+            future: getData(),
+            builder: (context, snapshot) {
+              Widget render;
+              if (snapshot.hasData) {
+                var fnotes = snapshot.data!.docs;
+                render = ListView(
+                  children: List.generate(
+                    // _notes.length,
+                    fnotes.length,
+                    (i) {
+                      return Row(
+                        children: [
+                          Expanded(
+                            flex: 5,
+                            child: ViewItem(
+                              note: fnotes[i],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: IconButton(
+                              icon: Icon(Icons.delete_forever),
+                              onPressed: () {
+                                setState(
+                                  () {
+                                    // _notes.removeAt(i);
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                );
+              } else if (snapshot.hasError) {
+                render = Text("eror${snapshot.error}");
+              } else {
+                render = CircularProgressIndicator();
+              }
+              return render;
+            },
+          ),
+*/
+//------- Stream Builder
+/*
+
+*/    
+//-----------------------
+
 /*
 **
 */
@@ -297,22 +371,3 @@ class ViewItem extends StatelessWidget {
   } 
 
   */
-/*---------------------------------
-
-//------------------
-
- */
-/*
-body: ListView(
-          children: (notes.isEmpty)
-              ? [
-                  CircularProgressIndicator(),
-                ]
-              : [
-                  for (var i in notes)
-                    ViewItem(
-                      note: i,
-                    )
-                ],
-        ),
- */
